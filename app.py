@@ -17,10 +17,10 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("Excel → PowerPoint Dealer Data Automation")
+st.title("Excel_to_PowerPoint_Auto_Add SAPCODE")
 
 st.caption(
-    "Safe matching: Name + Contact → duplicate होने पर Size → SAP Code transfer"
+    "Safe matching:Excel_to_PowerPoint_Auto_Matcher SAP Code transfer"
 )
 
 
