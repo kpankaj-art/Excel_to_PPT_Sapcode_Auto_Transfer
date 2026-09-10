@@ -1154,7 +1154,7 @@ with st.sidebar:
     st.markdown('<div class="upload-label excel-label">Upload Excel File</div>', unsafe_allow_html=True)
 
     excel_file = st.file_uploader(
-    
+        "Upload Excel File",
         type=["xlsx", "xls"],
         key="excel_upload"
     )
