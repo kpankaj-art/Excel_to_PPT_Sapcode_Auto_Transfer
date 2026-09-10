@@ -2,4 +2,3 @@ streamlit
 pandas
 openpyxl
 python-pptx
-xlrd
