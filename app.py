@@ -1199,6 +1199,8 @@ with st.sidebar:
     else:
         st.info("Upload both files to continue.")
 
+    st.caption("Downloads appear after a successful transfer.")
+
     process_button = st.button(
         "🚀 Transfer / Update PowerPoint",
         type="primary",
@@ -1246,57 +1248,60 @@ if excel_file and ppt_file:
 
             mapping = detect_columns(df)
 
-            st.subheader("3️⃣ Detected Excel Columns")
+            with st.expander("📋 Detected Excel Columns", expanded=False):
 
-            display_mapping = {
+                st.subheader("3️⃣ Detected Excel Columns")
 
-                "Outlet / Dealer Name":
-                    mapping.get("name"),
+                display_mapping = {
 
-                "Contact":
-                    mapping.get("contact"),
+                    "Outlet / Dealer Name":
+                        mapping.get("name"),
 
-                "SAP Code":
-                    mapping.get("sap"),
+                    "Contact":
+                        mapping.get("contact"),
 
-                "Brand":
-                    mapping.get("brand"),
+                    "SAP Code":
+                        mapping.get("sap"),
 
-                "Address":
-                    mapping.get("address"),
+                    "Brand":
+                        mapping.get("brand"),
 
-                "District":
-                    mapping.get("district"),
+                    "Address":
+                        mapping.get("address"),
 
-                "Media Type":
-                    mapping.get("type"),
+                    "District":
+                        mapping.get("district"),
 
-                "Width":
-                    mapping.get("width"),
+                    "Media Type":
+                        mapping.get("type"),
 
-                "Height":
-                    mapping.get("height"),
+                    "Width":
+                        mapping.get("width"),
 
-                "Size":
-                    "W + H"
-                    if mapping.get("width")
-                    and mapping.get("height")
-                    else mapping.get("size")
-            }
+                    "Height":
+                        mapping.get("height"),
 
-            mapping_df = pd.DataFrame(
-                list(display_mapping.items()),
-                columns=[
-                    "Field",
-                    "Excel Column"
-                ]
-            )
+                    "Size":
+                        "W + H"
+                        if mapping.get("width")
+                        and mapping.get("height")
+                        else mapping.get("size")
+                }
 
-            st.dataframe(
-                mapping_df,
-                use_container_width=True,
-                hide_index=True
-            )
+                mapping_df = pd.DataFrame(
+                    list(display_mapping.items()),
+                    columns=[
+                        "Field",
+                        "Excel Column"
+                    ]
+                )
+
+                st.dataframe(
+                    mapping_df,
+                    use_container_width=True,
+                    hide_index=True
+                )
+
 
             # -------------------------------------------------
             # REQUIRED MATCHING COLUMNS
@@ -1351,38 +1356,41 @@ if excel_file and ppt_file:
 
             ppt_slides = extract_ppt_fields(prs)
 
-            st.subheader("4️⃣ Detected PowerPoint Data")
+            with st.expander("🖥️ Detected PowerPoint Data", expanded=False):
 
-            ppt_preview = []
+                st.subheader("4️⃣ Detected PowerPoint Data")
 
-            for item in ppt_slides:
+                ppt_preview = []
 
-                ppt_preview.append({
+                for item in ppt_slides:
 
-                    "Slide":
-                        item["slide"],
+                    ppt_preview.append({
 
-                    "Outlet Name":
-                        item["name"],
+                        "Slide":
+                            item["slide"],
 
-                    "Contact":
-                        item["contact"],
+                        "Outlet Name":
+                            item["name"],
 
-                    "Size":
-                        item["size"],
+                        "Contact":
+                            item["contact"],
 
-                    "Media Type":
-                        item["type"],
+                        "Size":
+                            item["size"],
 
-                    "District":
-                        item["district"]
-                })
+                        "Media Type":
+                            item["type"],
 
-            st.dataframe(
-                pd.DataFrame(ppt_preview),
-                use_container_width=True,
-                hide_index=True
-            )
+                        "District":
+                            item["district"]
+                    })
+
+                st.dataframe(
+                    pd.DataFrame(ppt_preview),
+                    use_container_width=True,
+                    hide_index=True
+                )
+
 
             # -------------------------------------------------
             # MATCHING
@@ -1695,6 +1703,8 @@ if excel_file and ppt_file:
                         )
 
                     # -----------------------------------------
+                    st.markdown("### 📥 Download Center")
+
                     # Download Updated PPT
                     # -----------------------------------------
 
