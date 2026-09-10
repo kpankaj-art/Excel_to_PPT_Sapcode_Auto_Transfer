@@ -136,13 +136,13 @@ st.markdown(
             }
 
             [data-testid="stSidebar"] {
-                width: 200px !important;
-                min-width: 200px !important;
-                max-width: 200px !important;
+                width: 290px !important;
+                min-width: 290px !important;
+                max-width: 290px !important;
             }
 
             [data-testid="stSidebar"] > div:first-child {
-                width: 200px !important;
+                width: 290px !important;
             }
 
             h1 {
