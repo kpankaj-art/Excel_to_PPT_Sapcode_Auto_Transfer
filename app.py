@@ -1623,7 +1623,12 @@ if excel_file and ppt_file:
             st.download_button(
                 label="Download Final PPT",
                 data=final_ppt,
-                file_name="Final_SAP_Transfer.pptx",
+                original_name = ppt_file.name
+
+if original_name.lower().endswith(".pptx"):
+    original_name = original_name[:-5]
+
+updated_name = original_name + "_Update.pptx"
                 mime=(
                     "application/vnd.openxmlformats-officedocument."
                     "presentationml.presentation"
@@ -1634,18 +1639,15 @@ if excel_file and ppt_file:
             # REPORT EXCEL
             # -------------------------------------------------
 
-            st.download_button(
-                label="Download Matching Report",
-                data=create_report_excel(
-                    report
-                ),
-                file_name="PPT_Matching_Report.xlsx",
-                mime=(
-                    "application/vnd.openxmlformats-officedocument."
-                    "spreadsheetml.sheet"
-                )
-            )
-
+           st.download_button(
+    label="Download Updated PPT",
+    data=final_ppt,
+    file_name=updated_name,
+    mime=(
+        "application/vnd.openxmlformats-officedocument."
+        "presentationml.presentation"
+    )
+)
     except Exception as error:
 
         st.error(
