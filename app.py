@@ -47,13 +47,13 @@ st.markdown(
         /* Keep the sidebar compact so it does not push the workspace
            outside the browser viewport. */
         [data-testid="stSidebar"] {
-            width: 290px !important;
-            min-width: 290px !important;
-            max-width: 290px !important;
+            width: 230px !important;
+            min-width: 230px !important;
+            max-width: 230px !important;
         }
 
         [data-testid="stSidebar"] > div:first-child {
-            width: 290px !important;
+            width: 230px !important;
         }
 
         [data-testid="stSidebar"] .block-container {
