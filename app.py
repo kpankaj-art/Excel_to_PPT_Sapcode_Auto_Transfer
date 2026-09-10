@@ -35,7 +35,7 @@ st.markdown(
             font-weight: 700;
             line-height: 1.15;
             padding: 0.38rem 0.55rem;
-            margin: 0.12rem 0 0.28rem 0;
+            margin: 0.08rem 0 0.22rem 0;
             border-radius: 6px;
             border-left: 4px solid;
             letter-spacing: 0.01em;
@@ -57,6 +57,10 @@ st.markdown(
             height: 0 !important;
             margin: 0 !important;
             padding: 0 !important;
+        }
+
+        [data-testid="stSidebar"] [data-testid="stFileUploader"] > label {
+            display: none !important;
         }
 
         /* ---------- LARGER SECTION / ACTION TEXT ---------- */
@@ -1223,26 +1227,6 @@ if excel_file and ppt_file:
     )
 
     st.divider()
-
-    # -----------------------------------------------------
-    # CONTENT SELECTION
-    # -----------------------------------------------------
-
-    st.subheader("2️⃣ Select What to Add")
-
-    add_mode = st.selectbox(
-        "Select Option",
-        [
-            "SAP Code",
-            "Brand",
-            "Both (SAP Code + Brand)"
-        ]
-    )
-
-    st.info(
-        "SAP Code will be added below District in the information box. "
-        "Brand will be added as bold text in the designated brand area."
-    )
 
     if process_button:
 
