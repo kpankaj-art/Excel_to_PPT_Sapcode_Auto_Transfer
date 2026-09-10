@@ -9,7 +9,7 @@ from pptx.util import Pt
 
 
 # =========================================================
-# APP
+# APP SETTINGS
 # =========================================================
 
 st.set_page_config(
@@ -109,8 +109,7 @@ ALIASES = {
         "media type",
         "media",
         "board type",
-        "material type",
-        "type"
+        "material type"
     ],
 
     "remarks": [
@@ -131,7 +130,7 @@ ALIASES = {
 
 
 # =========================================================
-# PPT LABELS
+# PPT LABEL ALIASES
 # =========================================================
 
 PPT_LABELS = {
@@ -206,7 +205,7 @@ PPT_LABELS = {
 
 
 # =========================================================
-# NORMALIZATION
+# NORMALIZE TEXT
 # =========================================================
 
 def norm(value):
@@ -271,7 +270,7 @@ def similarity(a, b):
 
 
 # =========================================================
-# PHONE
+# PHONE NUMBER
 # =========================================================
 
 def extract_phones(value):
@@ -303,11 +302,16 @@ def extract_phones(value):
         )
 
         if len(number) >= 10:
+
             result.add(
                 number[-10:]
             )
+
         elif number:
-            result.add(number)
+
+            result.add(
+                number
+            )
 
     return result
 
@@ -367,7 +371,7 @@ def normalize_size(value):
 
 
 # =========================================================
-# EXCEL COLUMN DETECTION
+# DETECT EXCEL COLUMNS
 # =========================================================
 
 def detect_columns(df):
@@ -378,9 +382,9 @@ def detect_columns(df):
 
     mapping = {}
 
-    # ---------------------------------------------
-    # Explicit W / H detection FIRST
-    # ---------------------------------------------
+    # -----------------------------------------------------
+    # W / WIDTH
+    # -----------------------------------------------------
 
     for column in columns:
 
@@ -404,34 +408,26 @@ def detect_columns(df):
 
             mapping["height"] = column
 
-    # ---------------------------------------------
-    # Other fields
-    # ---------------------------------------------
+    # -----------------------------------------------------
+    # OTHER COLUMNS
+    # -----------------------------------------------------
 
     for field, aliases in ALIASES.items():
 
-        # Size must NOT select TYPE
+        valid_columns = columns
+
+        # TYPE को Size नहीं मानना
         if field == "size":
 
-            valid_columns = []
-
-            for column in columns:
-
-                n = norm(column)
-
-                if n not in {
+            valid_columns = [
+                column
+                for column in columns
+                if norm(column) not in {
                     "type",
-                    "media type",
-                    "media"
-                }:
-
-                    valid_columns.append(
-                        column
-                    )
-
-        else:
-
-            valid_columns = columns
+                    "media",
+                    "media type"
+                }
+            ]
 
         best_column = None
         best_score = 0
@@ -442,7 +438,9 @@ def detect_columns(df):
 
             for alias in aliases:
 
-                alias_norm = norm(alias)
+                alias_norm = norm(
+                    alias
+                )
 
                 if header == alias_norm:
 
@@ -472,7 +470,9 @@ def detect_columns(df):
             and best_score >= 0.70
         ):
 
-            mapping[field] = best_column
+            mapping[field] = (
+                best_column
+            )
 
     return mapping
 
@@ -521,7 +521,7 @@ def get_value(
 
 
 # =========================================================
-# EXCEL SIZE
+# GET EXCEL SIZE
 # =========================================================
 
 def get_excel_size(
@@ -530,7 +530,7 @@ def get_excel_size(
 ):
 
     # ---------------------------------------------
-    # If real Size column exists
+    # First: Size column
     # ---------------------------------------------
 
     size_column = mapping.get(
@@ -549,11 +549,10 @@ def get_excel_size(
         )
 
         if size:
-
             return size
 
     # ---------------------------------------------
-    # Otherwise W + H
+    # Second: W + H
     # ---------------------------------------------
 
     width_column = mapping.get(
@@ -587,7 +586,7 @@ def get_excel_size(
 
 
 # =========================================================
-# PPT LABEL PARSER
+# PPT LINE PARSER
 # =========================================================
 
 def parse_ppt_line(line):
@@ -598,7 +597,6 @@ def parse_ppt_line(line):
     )
 
     if not match:
-
         return None, None
 
     label = norm(
@@ -656,7 +654,7 @@ def parse_ppt_line(line):
 
 
 # =========================================================
-# READ PPT
+# EXTRACT PPT FIELDS
 # =========================================================
 
 def extract_ppt_fields(slide):
@@ -669,11 +667,9 @@ def extract_ppt_fields(slide):
             shape,
             "text"
         ):
-
             continue
 
         if not shape.text.strip():
-
             continue
 
         for line in shape.text.splitlines():
@@ -692,19 +688,19 @@ def extract_ppt_fields(slide):
 
 
 # =========================================================
-# PPT INDEX
+# BUILD PPT INDEX
 # =========================================================
 
 def build_ppt_index(prs):
 
-    result = []
+    index = []
 
     for slide_no, slide in enumerate(
         prs.slides,
         start=1
     ):
 
-        result.append(
+        index.append(
             {
                 "slide_no": slide_no,
                 "fields":
@@ -714,7 +710,7 @@ def build_ppt_index(prs):
             }
         )
 
-    return result
+    return index
 
 
 # =========================================================
@@ -735,15 +731,13 @@ def name_match(
     )
 
     if not a or not b:
-
         return False
 
-    # Exact
+    # Exact match
     if a == b:
-
         return True
 
-    # Small spelling difference
+    # Minor spelling mistake
     return (
         SequenceMatcher(
             None,
@@ -755,11 +749,7 @@ def name_match(
 
 
 # =========================================================
-# MATCH LOGIC
-#
-# 1. Name
-# 2. Contact
-# 3. If multiple -> Size
+# MATCH EXCEL ROW WITH PPT
 # =========================================================
 
 def match_row(
@@ -785,6 +775,10 @@ def match_row(
         mapping
     )
 
+    # -----------------------------------------------------
+    # NAME REQUIRED
+    # -----------------------------------------------------
+
     if not excel_name:
 
         return (
@@ -792,6 +786,10 @@ def match_row(
             "Excel outlet/dealer name missing",
             ""
         )
+
+    # -----------------------------------------------------
+    # CONTACT REQUIRED
+    # -----------------------------------------------------
 
     if not excel_contact:
 
@@ -801,9 +799,9 @@ def match_row(
             ""
         )
 
-    # ---------------------------------------------
+    # -----------------------------------------------------
     # NAME + CONTACT
-    # ---------------------------------------------
+    # -----------------------------------------------------
 
     candidates = []
 
@@ -839,9 +837,9 @@ def match_row(
                 item
             )
 
-    # ---------------------------------------------
-    # Nothing found
-    # ---------------------------------------------
+    # -----------------------------------------------------
+    # NO MATCH
+    # -----------------------------------------------------
 
     if not candidates:
 
@@ -851,9 +849,9 @@ def match_row(
             ""
         )
 
-    # ---------------------------------------------
-    # Only one PPT record
-    # ---------------------------------------------
+    # -----------------------------------------------------
+    # UNIQUE NAME + CONTACT
+    # -----------------------------------------------------
 
     if len(candidates) == 1:
 
@@ -865,18 +863,22 @@ def match_row(
             ]
         )
 
-    # ---------------------------------------------
-    # Multiple records
-    # Size becomes compulsory
-    # ---------------------------------------------
+    # -----------------------------------------------------
+    # DUPLICATE NAME + CONTACT
+    # SIZE REQUIRED
+    # -----------------------------------------------------
 
     if not excel_size:
 
         return (
             "AMBIGUOUS",
-            "Multiple Name + Contact matches but Excel size missing",
+            "Multiple Name + Contact matches but Excel size is missing",
             ""
         )
+
+    # -----------------------------------------------------
+    # SIZE MATCH
+    # -----------------------------------------------------
 
     size_candidates = []
 
@@ -891,12 +893,17 @@ def match_row(
             )
         )
 
-        if ppt_size == excel_size:
+        if (
+            ppt_size
+            and
+            ppt_size == excel_size
+        ):
 
             size_candidates.append(
                 candidate
             )
 
+    # Exactly one
     if len(size_candidates) == 1:
 
         return (
@@ -907,6 +914,7 @@ def match_row(
             ]
         )
 
+    # More than one
     if len(size_candidates) > 1:
 
         return (
@@ -915,15 +923,19 @@ def match_row(
             ""
         )
 
+    # Size mismatch
     return (
         "NO_MATCH",
-        f"Name + Contact matched but Size {excel_size} did not match",
+        (
+            "Name + Contact matched but "
+            f"Size {excel_size} did not match"
+        ),
         ""
     )
 
 
 # =========================================================
-# FIND MAIN INFORMATION BOX
+# FIND MAIN INFORMATION TEXT BOX
 # =========================================================
 
 def find_info_shape(slide):
@@ -931,7 +943,7 @@ def find_info_shape(slide):
     best_shape = None
     best_score = -1
 
-    required = {
+    required_fields = {
         "outlet_name",
         "address",
         "contact_no",
@@ -944,11 +956,9 @@ def find_info_shape(slide):
             shape,
             "text"
         ):
-
             continue
 
         if not shape.text.strip():
-
             continue
 
         found = set()
@@ -969,7 +979,7 @@ def find_info_shape(slide):
 
         score = len(
             found.intersection(
-                required
+                required_fields
             )
         )
 
@@ -982,7 +992,42 @@ def find_info_shape(slide):
 
 
 # =========================================================
-# ADD SAPCODE WITH AUTO SPACE ADJUSTMENT
+# GET ORIGINAL FONT SIZE
+# =========================================================
+
+def get_existing_font_size(shape):
+
+    sizes = []
+
+    try:
+
+        for paragraph in (
+            shape.text_frame.paragraphs
+        ):
+
+            for run in paragraph.runs:
+
+                if run.font.size:
+
+                    sizes.append(
+                        run.font.size.pt
+                    )
+
+    except Exception:
+
+        pass
+
+    if sizes:
+
+        return min(
+            sizes
+        )
+
+    return 15
+
+
+# =========================================================
+# WRITE ALL TEXT AS BOLD
 # =========================================================
 
 def write_text_with_auto_fit(
@@ -992,7 +1037,42 @@ def write_text_with_auto_fit(
 
     text_frame = shape.text_frame
 
+    original_size = (
+        get_existing_font_size(
+            shape
+        )
+    )
+
+    # ---------------------------------------------
+    # Clear old text
+    # ---------------------------------------------
+
     text_frame.clear()
+
+    text_frame.word_wrap = True
+
+    # ---------------------------------------------
+    # SAP code added = one extra line
+    # Reduce font if necessary
+    # ---------------------------------------------
+
+    if len(lines) >= 8:
+
+        font_size = max(
+            9,
+            min(
+                original_size,
+                12
+            )
+        )
+
+    else:
+
+        font_size = original_size
+
+    # ---------------------------------------------
+    # Write every line
+    # ---------------------------------------------
 
     for index, line in enumerate(
         lines
@@ -1010,34 +1090,27 @@ def write_text_with_auto_fit(
                 text_frame.add_paragraph()
             )
 
-        paragraph.text = line
+        run = paragraph.add_run()
 
-    text_frame.word_wrap = True
+        run.text = str(
+            line
+        )
 
-    # ---------------------------------------------
-    # Existing template has 7 lines.
-    # Adding SAP makes 8.
-    # Reduce font automatically.
-    # ---------------------------------------------
+        # =========================================
+        # IMPORTANT
+        # ALL TEXT BOLD
+        # =========================================
 
-    if len(lines) >= 8:
+        run.font.bold = True
 
-        font_size = 12
+        run.font.size = Pt(
+            font_size
+        )
 
-    else:
 
-        font_size = 15
-
-    for paragraph in (
-        text_frame.paragraphs
-    ):
-
-        for run in paragraph.runs:
-
-            run.font.size = Pt(
-                font_size
-            )
-
+# =========================================================
+# ADD SAP CODE
+# =========================================================
 
 def add_sapcode(
     slide,
@@ -1045,16 +1118,15 @@ def add_sapcode(
 ):
 
     if not sapcode:
-
         return False
 
     sapcode = str(
         sapcode
     ).strip()
 
-    # ---------------------------------------------
-    # If Sapcode already exists
-    # ---------------------------------------------
+    # -----------------------------------------------------
+    # EXISTING SAPCODE FIELD
+    # -----------------------------------------------------
 
     for shape in slide.shapes:
 
@@ -1062,11 +1134,9 @@ def add_sapcode(
             shape,
             "text"
         ):
-
             continue
 
         if not shape.text.strip():
-
             continue
 
         lines = shape.text.splitlines()
@@ -1099,9 +1169,9 @@ def add_sapcode(
 
                 return True
 
-    # ---------------------------------------------
-    # Find main info box
-    # ---------------------------------------------
+    # -----------------------------------------------------
+    # FIND MAIN INFORMATION BOX
+    # -----------------------------------------------------
 
     shape = find_info_shape(
         slide
@@ -1111,7 +1181,8 @@ def add_sapcode(
 
         lines = shape.text.splitlines()
 
-        insert_at = len(
+        # Put SAP code after District
+        insert_position = len(
             lines
         )
 
@@ -1127,14 +1198,18 @@ def add_sapcode(
 
             if field == "district":
 
-                insert_at = (
+                insert_position = (
                     index + 1
                 )
 
         lines.insert(
-            insert_at,
+            insert_position,
             f"Sapcode     : {sapcode}"
         )
+
+        # ---------------------------------------------
+        # ALL TEXT INCLUDING SAPCODE WILL BE BOLD
+        # ---------------------------------------------
 
         write_text_with_auto_fit(
             shape,
@@ -1143,11 +1218,15 @@ def add_sapcode(
 
         return True
 
+    # -----------------------------------------------------
+    # Don't put SAP code randomly
+    # -----------------------------------------------------
+
     return False
 
 
 # =========================================================
-# PROCESS
+# PROCESS TRANSFER
 # =========================================================
 
 def process_transfer(
@@ -1169,6 +1248,10 @@ def process_transfer(
     used_slides = {}
 
     results = []
+
+    # -----------------------------------------------------
+    # Process every Excel row
+    # -----------------------------------------------------
 
     for excel_index, row in (
         df.iterrows()
@@ -1226,13 +1309,13 @@ def process_transfer(
                 slide_no
         }
 
-        # -----------------------------------------
+        # -------------------------------------------------
         # MATCHED
-        # -----------------------------------------
+        # -------------------------------------------------
 
         if status == "MATCHED":
 
-            # Same PPT slide cannot be reused
+            # Same slide cannot be used twice
             if slide_no in used_slides:
 
                 result["Status"] = (
@@ -1240,8 +1323,8 @@ def process_transfer(
                 )
 
                 result["Reason"] = (
-                    "This PPT slide is already "
-                    f"matched with Excel row "
+                    "PPT slide already used by "
+                    f"Excel row "
                     f"{used_slides[slide_no]}"
                 )
 
@@ -1257,24 +1340,38 @@ def process_transfer(
 
             else:
 
-                add_sapcode(
+                success = add_sapcode(
                     prs.slides[
                         slide_no - 1
                     ],
                     sapcode
                 )
 
-                used_slides[
-                    slide_no
-                ] = excel_index + 2
+                if success:
+
+                    used_slides[
+                        slide_no
+                    ] = excel_index + 2
+
+                else:
+
+                    result["Status"] = (
+                        "NO_MATCH"
+                    )
+
+                    result["Reason"] = (
+                        "Match found but PPT "
+                        "information box could "
+                        "not be located"
+                    )
 
         results.append(
             result
         )
 
-    # ---------------------------------------------
-    # SAVE PPT
-    # ---------------------------------------------
+    # -----------------------------------------------------
+    # SAVE FINAL PPT
+    # -----------------------------------------------------
 
     output = io.BytesIO()
 
@@ -1293,7 +1390,7 @@ def process_transfer(
 
 
 # =========================================================
-# REPORT
+# CREATE REPORT EXCEL
 # =========================================================
 
 def create_report_excel(
@@ -1319,31 +1416,46 @@ def create_report_excel(
 
 
 # =========================================================
-# UI
+# FILE UPLOAD
 # =========================================================
+
+st.divider()
 
 excel_file = st.file_uploader(
     "1. Upload Excel",
-    type=["xlsx", "xls"]
+    type=[
+        "xlsx",
+        "xls"
+    ]
 )
 
 ppt_file = st.file_uploader(
     "2. Upload PowerPoint",
-    type=["pptx"]
+    type=[
+        "pptx"
+    ]
 )
 
+
+# =========================================================
+# MAIN PROCESS
+# =========================================================
 
 if excel_file and ppt_file:
 
     try:
 
-        # ---------------------------------------------
+        # -------------------------------------------------
         # READ EXCEL
-        # ---------------------------------------------
+        # -------------------------------------------------
 
         df = pd.read_excel(
             excel_file
         )
+
+        # -------------------------------------------------
+        # AUTO DETECT COLUMNS
+        # -------------------------------------------------
 
         mapping = detect_columns(
             df
@@ -1422,9 +1534,9 @@ if excel_file and ppt_file:
             hide_index=True
         )
 
-        # ---------------------------------------------
-        # PPT INFO
-        # ---------------------------------------------
+        # -------------------------------------------------
+        # PPT INFORMATION
+        # -------------------------------------------------
 
         preview_prs = Presentation(
             io.BytesIO(
@@ -1437,9 +1549,9 @@ if excel_file and ppt_file:
             f"PPT slides: {len(preview_prs.slides)}"
         )
 
-        # ---------------------------------------------
+        # -------------------------------------------------
         # BUTTON
-        # ---------------------------------------------
+        # -------------------------------------------------
 
         if st.button(
             "Analyse & Transfer SAP Codes",
@@ -1457,6 +1569,10 @@ if excel_file and ppt_file:
                         mapping
                     )
                 )
+
+            # -------------------------------------------------
+            # SUMMARY
+            # -------------------------------------------------
 
             matched = int(
                 (
@@ -1486,6 +1602,10 @@ if excel_file and ppt_file:
                 f"{not_matched} not matched"
             )
 
+            # -------------------------------------------------
+            # REPORT
+            # -------------------------------------------------
+
             st.subheader(
                 "Matching Report"
             )
@@ -1496,12 +1616,12 @@ if excel_file and ppt_file:
                 hide_index=True
             )
 
-            # -----------------------------------------
+            # -------------------------------------------------
             # FINAL PPT
-            # -----------------------------------------
+            # -------------------------------------------------
 
             st.download_button(
-                "Download Final PPT",
+                label="Download Final PPT",
                 data=final_ppt,
                 file_name="Final_SAP_Transfer.pptx",
                 mime=(
@@ -1510,12 +1630,12 @@ if excel_file and ppt_file:
                 )
             )
 
-            # -----------------------------------------
-            # REPORT
-            # -----------------------------------------
+            # -------------------------------------------------
+            # REPORT EXCEL
+            # -------------------------------------------------
 
             st.download_button(
-                "Download Matching Report",
+                label="Download Matching Report",
                 data=create_report_excel(
                     report
                 ),
