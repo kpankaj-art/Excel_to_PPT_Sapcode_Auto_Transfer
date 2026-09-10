@@ -29,18 +29,19 @@ st.markdown(
     """
     <style>
         /* =====================================================
-           PROFESSIONAL LAPTOP UI
-           Balanced sidebar: wider, but compact typography.
+           TIGHT PROFESSIONAL SIDEBAR
+           Reduce unnecessary vertical gaps while keeping the
+           sidebar readable and professional.
            ===================================================== */
 
         .block-container {
             width: 100% !important;
             max-width: 100% !important;
-            padding: 0.65rem 0.9rem 1.2rem 0.9rem !important;
+            padding: 0.55rem 0.85rem 1rem 0.85rem !important;
             overflow-x: hidden !important;
         }
 
-        /* ---------- SIDEBAR ---------- */
+        /* ---------- SIDEBAR WIDTH ---------- */
 
         [data-testid="stSidebar"] {
             width: 275px !important;
@@ -54,157 +55,191 @@ st.markdown(
 
         [data-testid="stSidebar"] .block-container {
             width: 100% !important;
-            padding: 0.85rem 0.75rem 1rem 0.75rem !important;
+            padding: 0.35rem 0.65rem 0.6rem 0.65rem !important;
             overflow-x: hidden !important;
         }
 
+        /* ---------- ACTION HEADER ---------- */
+
         [data-testid="stSidebar"] h2 {
-            font-size: 1.05rem !important;
-            line-height: 1.15 !important;
-            margin: 0.1rem 0 0.55rem 0 !important;
+            font-size: 0.95rem !important;
+            line-height: 1.05 !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
         [data-testid="stSidebar"] h3 {
-            font-size: 0.82rem !important;
-            line-height: 1.15 !important;
-            margin: 0.5rem 0 0.3rem 0 !important;
+            font-size: 0.78rem !important;
+            line-height: 1.05 !important;
+            margin: 0.25rem 0 0.18rem 0 !important;
+            padding: 0 !important;
         }
 
-        [data-testid="stSidebar"] label {
-            font-size: 0.70rem !important;
-            line-height: 1.2 !important;
-        }
-
-        [data-testid="stSidebar"] p,
         [data-testid="stSidebar"] .stCaption {
-            font-size: 0.66rem !important;
-            line-height: 1.25 !important;
+            font-size: 0.61rem !important;
+            line-height: 1.1 !important;
+            margin: 0.08rem 0 0.25rem 0 !important;
         }
 
-        /* Upload cards */
+        [data-testid="stSidebar"] p {
+            font-size: 0.63rem !important;
+            line-height: 1.1 !important;
+            margin-top: 0.08rem !important;
+            margin-bottom: 0.18rem !important;
+        }
+
+        /* ---------- FILE UPLOAD SECTION ---------- */
+
         [data-testid="stSidebar"] [data-testid="stFileUploader"] {
-            margin-bottom: 0.35rem !important;
+            margin: 0 0 0.18rem 0 !important;
+            padding: 0 !important;
         }
 
         [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
-            min-height: 76px !important;
-            padding: 0.45rem 0.5rem !important;
-            border-radius: 8px !important;
+            min-height: 68px !important;
+            height: 68px !important;
+            padding: 0.3rem 0.45rem !important;
+            border-radius: 7px !important;
         }
 
         [data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] {
             padding: 0 !important;
+            gap: 0.15rem !important;
         }
 
         [data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] > div {
-            font-size: 0.66rem !important;
-            line-height: 1.1 !important;
+            font-size: 0.62rem !important;
+            line-height: 1.05 !important;
         }
 
-        /* Select box */
+        /* Uploaded file name */
+        [data-testid="stSidebar"] [data-testid="stFileUploaderFile"] {
+            margin: 0 !important;
+            padding: 0.15rem 0.25rem !important;
+        }
+
+        /* ---------- SELECT ---------- */
+
         [data-testid="stSidebar"] [data-baseweb="select"] {
-            min-height: 36px !important;
+            min-height: 34px !important;
+            height: 34px !important;
         }
 
         [data-testid="stSidebar"] [data-baseweb="select"] * {
-            font-size: 0.70rem !important;
+            font-size: 0.66rem !important;
         }
 
-        /* Action button */
+        /* ---------- ACTION BUTTON ---------- */
+
+        [data-testid="stSidebar"] .stButton {
+            margin-top: 0.25rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+
         [data-testid="stSidebar"] .stButton button {
-            min-height: 38px !important;
-            padding: 0.3rem 0.55rem !important;
-            font-size: 0.70rem !important;
-            font-weight: 650 !important;
-            line-height: 1.15 !important;
+            min-height: 36px !important;
+            height: 36px !important;
+            padding: 0.25rem 0.45rem !important;
+            font-size: 0.67rem !important;
+            line-height: 1.05 !important;
             border-radius: 7px !important;
         }
 
+        /* ---------- DIVIDERS ---------- */
+
         [data-testid="stSidebar"] hr {
-            margin: 0.65rem 0 !important;
+            margin: 0.35rem 0 !important;
+            padding: 0 !important;
+        }
+
+        /* ---------- FILE STATUS ---------- */
+
+        [data-testid="stSidebar"] [data-testid="stAlert"] {
+            padding: 0.25rem 0.4rem !important;
+            margin: 0.15rem 0 !important;
+        }
+
+        [data-testid="stSidebar"] [data-testid="stAlert"] p {
+            font-size: 0.60rem !important;
+            line-height: 1.05 !important;
+            margin: 0 !important;
         }
 
         /* ---------- MAIN WORKSPACE ---------- */
 
         h1 {
-            font-size: 1.50rem !important;
-            line-height: 1.1 !important;
-            margin: 0 0 0.2rem 0 !important;
+            font-size: 1.45rem !important;
+            line-height: 1.05 !important;
+            margin: 0 0 0.15rem 0 !important;
             white-space: nowrap !important;
         }
 
         .main .stCaption {
-            font-size: 0.68rem !important;
-            line-height: 1.2 !important;
-            margin-bottom: 0.3rem !important;
+            font-size: 0.64rem !important;
+            line-height: 1.1 !important;
+            margin: 0 0 0.25rem 0 !important;
         }
 
         .section-title {
-            font-size: 0.84rem !important;
-            line-height: 1.1 !important;
+            font-size: 0.80rem !important;
+            line-height: 1.05 !important;
             font-weight: 700 !important;
-            margin: 0.35rem 0 0.25rem 0 !important;
+            margin: 0.25rem 0 0.18rem 0 !important;
         }
 
         .main h2 {
-            font-size: 0.88rem !important;
-            line-height: 1.1 !important;
-            margin: 0.4rem 0 0.25rem 0 !important;
+            font-size: 0.84rem !important;
+            line-height: 1.05 !important;
+            margin: 0.3rem 0 0.18rem 0 !important;
         }
 
         .main h3 {
-            font-size: 0.80rem !important;
-            line-height: 1.1 !important;
-            margin: 0.3rem 0 0.2rem 0 !important;
+            font-size: 0.76rem !important;
+            line-height: 1.05 !important;
+            margin: 0.25rem 0 0.15rem 0 !important;
         }
 
         .main p,
         .main label {
-            font-size: 0.66rem !important;
-            line-height: 1.2 !important;
+            font-size: 0.63rem !important;
+            line-height: 1.1 !important;
         }
 
-        /* Metrics */
-        [data-testid="stMetric"] {
-            padding: 0.15rem 0.35rem !important;
-        }
-
-        [data-testid="stMetricValue"] {
-            font-size: 1.05rem !important;
-            line-height: 1 !important;
-        }
-
-        [data-testid="stMetricLabel"] {
-            font-size: 0.60rem !important;
-        }
-
-        /* Tables */
         [data-testid="stDataFrame"] {
             width: 100% !important;
             max-width: 100% !important;
             margin: 0 !important;
         }
 
-        /* Alerts */
+        [data-testid="stMetric"] {
+            padding: 0.1rem 0.25rem !important;
+        }
+
+        [data-testid="stMetricValue"] {
+            font-size: 1rem !important;
+        }
+
+        [data-testid="stMetricLabel"] {
+            font-size: 0.58rem !important;
+        }
+
         [data-testid="stAlert"] {
-            padding: 0.35rem 0.55rem !important;
-            margin: 0.25rem 0 !important;
+            padding: 0.3rem 0.45rem !important;
+            margin: 0.2rem 0 !important;
         }
 
         [data-testid="stAlert"] p {
-            font-size: 0.64rem !important;
-            line-height: 1.2 !important;
+            font-size: 0.62rem !important;
+            line-height: 1.1 !important;
         }
 
-        /* Download/action buttons in workspace */
         .main .stButton button,
         .main .stDownloadButton button {
-            min-height: 36px !important;
-            padding: 0.3rem 0.6rem !important;
-            font-size: 0.68rem !important;
+            min-height: 34px !important;
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.66rem !important;
         }
 
-        /* Keep long text from creating horizontal overflow */
         [data-testid="stSidebar"] *,
         .main * {
             overflow-wrap: anywhere !important;
@@ -219,20 +254,20 @@ st.markdown(
             }
 
             h1 {
-                font-size: 1.30rem !important;
+                font-size: 1.28rem !important;
             }
         }
 
         @media (max-width: 900px) {
             [data-testid="stSidebar"],
             [data-testid="stSidebar"] > div:first-child {
-                width: 230px !important;
-                min-width: 230px !important;
-                max-width: 230px !important;
+                width: 225px !important;
+                min-width: 225px !important;
+                max-width: 225px !important;
             }
 
             h1 {
-                font-size: 1.15rem !important;
+                font-size: 1.12rem !important;
             }
         }
     </style>
@@ -1059,7 +1094,7 @@ def create_report_excel(results):
 with st.sidebar:
 
     st.markdown("## ⚙️ Actions")
-    st.caption("Upload your files and choose the transfer operation.")
+    st.caption("Upload files and select the transfer operation.")
 
     st.markdown("### 1. Upload Files")
 
