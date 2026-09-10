@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 st.title("📊 Transfer Workspace")
-st.caption("Transfer SAP Code and/or Brand from Excel to an existing PowerPoint template using safe matching.")
+st.caption("Transfer SAP Code and/or Brand from Excel to PowerPoint with safe matching.")
 
 # =========================================================
 # PROFESSIONAL UI STYLING
@@ -28,80 +28,93 @@ st.caption("Transfer SAP Code and/or Brand from Excel to an existing PowerPoint 
 st.markdown(
     """
     <style>
-        /* ---------- RESPONSIVE PAGE ---------- */
-
+        /* Compact laptop-friendly layout */
         .block-container {
             width: 100% !important;
             max-width: 100% !important;
-            padding-top: 1rem !important;
-            padding-right: 1.25rem !important;
-            padding-bottom: 2rem !important;
-            padding-left: 1.25rem !important;
+            padding: 0.5rem 0.7rem 1rem 0.7rem !important;
             overflow-x: hidden !important;
         }
 
-        .main .block-container {
-            overflow-x: hidden !important;
-        }
-
-        /* Keep the sidebar compact so it does not push the workspace
-           outside the browser viewport. */
         [data-testid="stSidebar"] {
-            width: 230px !important;
-            min-width: 230px !important;
-            max-width: 230px !important;
+            width: 215px !important;
+            min-width: 215px !important;
+            max-width: 215px !important;
         }
 
         [data-testid="stSidebar"] > div:first-child {
-            width: 230px !important;
+            width: 215px !important;
         }
 
         [data-testid="stSidebar"] .block-container {
             width: 100% !important;
-            padding: 1rem 0.85rem 1.5rem 0.85rem !important;
+            padding: 0.55rem 0.45rem 0.7rem 0.45rem !important;
             overflow-x: hidden !important;
         }
 
-        /* ---------- MAIN TITLE ---------- */
-
+        /* Main title */
         h1 {
-            font-size: clamp(1.65rem, 2.2vw, 2.35rem) !important;
+            font-size: 1.35rem !important;
+            line-height: 1.05 !important;
+            margin: 0 0 0.15rem 0 !important;
+            white-space: nowrap !important;
+        }
+
+        .main .stCaption {
+            font-size: 0.62rem !important;
             line-height: 1.15 !important;
-            margin-top: 0 !important;
-            margin-bottom: 0.35rem !important;
-            white-space: normal !important;
-            overflow-wrap: anywhere !important;
+            margin: 0 0 0.2rem 0 !important;
         }
 
-        .main p {
-            max-width: 100% !important;
-            overflow-wrap: anywhere !important;
-        }
-
-        /* ---------- SIDEBAR ---------- */
-
-        [data-testid="stSidebar"] h2,
-        [data-testid="stSidebar"] h3 {
-            font-size: 1.05rem !important;
-            line-height: 1.25 !important;
-        }
-
-        [data-testid="stSidebar"] .stCaption {
+        /* Section headings */
+        .section-title {
             font-size: 0.78rem !important;
+            line-height: 1.05 !important;
+            margin: 0.25rem 0 0.2rem 0 !important;
         }
 
+        .main h2 {
+            font-size: 0.82rem !important;
+            margin: 0.3rem 0 0.2rem 0 !important;
+        }
+
+        .main h3 {
+            font-size: 0.76rem !important;
+            margin: 0.25rem 0 0.15rem 0 !important;
+        }
+
+        .main p,
+        .main label {
+            font-size: 0.62rem !important;
+            line-height: 1.15 !important;
+        }
+
+        /* Sidebar text */
+        [data-testid="stSidebar"] h2 {
+            font-size: 0.85rem !important;
+            margin: 0.15rem 0 0.35rem 0 !important;
+        }
+
+        [data-testid="stSidebar"] h3 {
+            font-size: 0.76rem !important;
+            margin: 0.25rem 0 0.2rem 0 !important;
+        }
+
+        [data-testid="stSidebar"] label,
+        [data-testid="stSidebar"] p,
+        [data-testid="stSidebar"] .stCaption {
+            font-size: 0.62rem !important;
+            line-height: 1.15 !important;
+        }
+
+        /* Small upload areas */
         [data-testid="stSidebar"] [data-testid="stFileUploader"] {
-            margin-bottom: 0.45rem !important;
+            margin-bottom: 0.15rem !important;
         }
 
-        /* Make uploader boxes shorter and fit narrow screens. */
         [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
-            min-height: 92px !important;
-            padding: 0.65rem !important;
-        }
-
-        [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] > div {
-            gap: 0.35rem !important;
+            min-height: 58px !important;
+            padding: 0.25rem !important;
         }
 
         [data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] {
@@ -109,83 +122,91 @@ st.markdown(
         }
 
         [data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] > div {
-            font-size: 0.78rem !important;
+            font-size: 0.60rem !important;
+            line-height: 1.05 !important;
         }
 
-        [data-testid="stSidebar"] .stButton button {
-            min-height: 44px !important;
-            width: 100% !important;
-            white-space: normal !important;
-            line-height: 1.2 !important;
+        /* Select and buttons */
+        [data-testid="stSidebar"] [data-baseweb="select"],
+        [data-testid="stSidebar"] [data-baseweb="select"] * {
+            font-size: 0.64rem !important;
         }
 
-        /* ---------- TABLES ---------- */
+        [data-testid="stSidebar"] .stButton button,
+        .main .stButton button,
+        .main .stDownloadButton button {
+            min-height: 31px !important;
+            padding: 0.2rem 0.4rem !important;
+            font-size: 0.64rem !important;
+            line-height: 1.05 !important;
+        }
 
+        /* Metrics */
+        [data-testid="stMetric"] {
+            padding: 0.1rem 0.25rem !important;
+        }
+
+        [data-testid="stMetricValue"] {
+            font-size: 0.95rem !important;
+            line-height: 1 !important;
+        }
+
+        [data-testid="stMetricLabel"] {
+            font-size: 0.58rem !important;
+        }
+
+        /* Alerts */
+        [data-testid="stAlert"] {
+            padding: 0.3rem 0.45rem !important;
+            margin: 0.2rem 0 !important;
+        }
+
+        [data-testid="stAlert"] p {
+            font-size: 0.60rem !important;
+            line-height: 1.1 !important;
+        }
+
+        /* Tables stay within the viewport */
         [data-testid="stDataFrame"] {
             width: 100% !important;
             max-width: 100% !important;
+            margin: 0 !important;
         }
 
-        /* ---------- MOBILE / SMALL WINDOW ---------- */
-
-        @media (max-width: 900px) {
-
-            .block-container {
-                padding-left: 0.75rem !important;
-                padding-right: 0.75rem !important;
-            }
-
-            [data-testid="stSidebar"] {
-                width: 290px !important;
-                min-width: 290px !important;
-                max-width: 290px !important;
-            }
-
-            [data-testid="stSidebar"] > div:first-child {
-                width: 290px !important;
-            }
-
-            h1 {
-                font-size: 1.55rem !important;
-            }
-        }
-
-        @media (max-width: 640px) {
-
-            .block-container {
-                padding-left: 0.5rem !important;
-                padding-right: 0.5rem !important;
-            }
-
-            h1 {
-                font-size: 1.35rem !important;
-            }
-        }
-
-        /* ---------- GENERAL ---------- */
-
-        .app-card {
-            border: 1px solid rgba(128,128,128,0.25);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 14px;
-        }
-
-        .section-title {
-            font-size: 1.05rem;
-            font-weight: 750;
-            margin-top: 8px;
-            margin-bottom: 10px;
-        }
-
-        /* Prevent long filenames and messages from causing horizontal overflow. */
+        /* Prevent long names / filenames from causing horizontal overflow */
         [data-testid="stSidebar"] * {
-            overflow-wrap: anywhere;
-            word-break: break-word;
+            overflow-wrap: anywhere !important;
+            word-break: break-word !important;
         }
 
         .main * {
             max-width: 100%;
+        }
+
+        @media (max-width: 1200px) {
+            [data-testid="stSidebar"],
+            [data-testid="stSidebar"] > div:first-child {
+                width: 195px !important;
+                min-width: 195px !important;
+                max-width: 195px !important;
+            }
+
+            h1 {
+                font-size: 1.20rem !important;
+            }
+        }
+
+        @media (max-width: 900px) {
+            [data-testid="stSidebar"],
+            [data-testid="stSidebar"] > div:first-child {
+                width: 185px !important;
+                min-width: 185px !important;
+                max-width: 185px !important;
+            }
+
+            h1 {
+                font-size: 1.10rem !important;
+            }
         }
     </style>
     """,
