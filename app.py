@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 st.title("📊 Transfer Workspace")
-st.write("Transfer SAP Code and/or Brand from Excel to an existing PowerPoint template using safe matching.")
+st.caption("Transfer SAP Code and/or Brand from Excel to an existing PowerPoint template using safe matching.")
 
 # =========================================================
 # PROFESSIONAL UI STYLING
@@ -28,20 +28,141 @@ st.write("Transfer SAP Code and/or Brand from Excel to an existing PowerPoint te
 st.markdown(
     """
     <style>
+        /* ---------- RESPONSIVE PAGE ---------- */
+
         .block-container {
-            padding-top: 1.2rem;
-            padding-bottom: 2rem;
-            max-width: 100%;
+            width: 100% !important;
+            max-width: 100% !important;
+            padding-top: 1rem !important;
+            padding-right: 1.25rem !important;
+            padding-bottom: 2rem !important;
+            padding-left: 1.25rem !important;
+            overflow-x: hidden !important;
         }
 
+        .main .block-container {
+            overflow-x: hidden !important;
+        }
+
+        /* Keep the sidebar compact so it does not push the workspace
+           outside the browser viewport. */
         [data-testid="stSidebar"] {
-            min-width: 330px;
-            max-width: 360px;
+            width: 290px !important;
+            min-width: 290px !important;
+            max-width: 290px !important;
+        }
+
+        [data-testid="stSidebar"] > div:first-child {
+            width: 290px !important;
         }
 
         [data-testid="stSidebar"] .block-container {
-            padding-top: 1.5rem;
+            width: 100% !important;
+            padding: 1rem 0.85rem 1.5rem 0.85rem !important;
+            overflow-x: hidden !important;
         }
+
+        /* ---------- MAIN TITLE ---------- */
+
+        h1 {
+            font-size: clamp(1.65rem, 2.2vw, 2.35rem) !important;
+            line-height: 1.15 !important;
+            margin-top: 0 !important;
+            margin-bottom: 0.35rem !important;
+            white-space: normal !important;
+            overflow-wrap: anywhere !important;
+        }
+
+        .main p {
+            max-width: 100% !important;
+            overflow-wrap: anywhere !important;
+        }
+
+        /* ---------- SIDEBAR ---------- */
+
+        [data-testid="stSidebar"] h2,
+        [data-testid="stSidebar"] h3 {
+            font-size: 1.05rem !important;
+            line-height: 1.25 !important;
+        }
+
+        [data-testid="stSidebar"] .stCaption {
+            font-size: 0.78rem !important;
+        }
+
+        [data-testid="stSidebar"] [data-testid="stFileUploader"] {
+            margin-bottom: 0.45rem !important;
+        }
+
+        /* Make uploader boxes shorter and fit narrow screens. */
+        [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
+            min-height: 92px !important;
+            padding: 0.65rem !important;
+        }
+
+        [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] > div {
+            gap: 0.35rem !important;
+        }
+
+        [data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] {
+            padding: 0 !important;
+        }
+
+        [data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] > div {
+            font-size: 0.78rem !important;
+        }
+
+        [data-testid="stSidebar"] .stButton button {
+            min-height: 44px !important;
+            width: 100% !important;
+            white-space: normal !important;
+            line-height: 1.2 !important;
+        }
+
+        /* ---------- TABLES ---------- */
+
+        [data-testid="stDataFrame"] {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        /* ---------- MOBILE / SMALL WINDOW ---------- */
+
+        @media (max-width: 900px) {
+
+            .block-container {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+
+            [data-testid="stSidebar"] {
+                width: 260px !important;
+                min-width: 260px !important;
+                max-width: 260px !important;
+            }
+
+            [data-testid="stSidebar"] > div:first-child {
+                width: 260px !important;
+            }
+
+            h1 {
+                font-size: 1.55rem !important;
+            }
+        }
+
+        @media (max-width: 640px) {
+
+            .block-container {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+            }
+
+            h1 {
+                font-size: 1.35rem !important;
+            }
+        }
+
+        /* ---------- GENERAL ---------- */
 
         .app-card {
             border: 1px solid rgba(128,128,128,0.25);
@@ -50,42 +171,21 @@ st.markdown(
             margin-bottom: 14px;
         }
 
-        .app-card-title {
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .status-card {
-            border-radius: 10px;
-            padding: 14px;
-            border: 1px solid rgba(128,128,128,0.25);
-            text-align: center;
-        }
-
-        .status-number {
-            font-size: 1.7rem;
-            font-weight: 800;
-        }
-
-        .status-label {
-            font-size: 0.85rem;
-            opacity: 0.75;
-        }
-
-        div[data-testid="stFileUploader"] {
-            margin-bottom: 8px;
-        }
-
         .section-title {
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             font-weight: 750;
             margin-top: 8px;
             margin-bottom: 10px;
         }
 
-        .sidebar-action button {
-            width: 100%;
+        /* Prevent long filenames and messages from causing horizontal overflow. */
+        [data-testid="stSidebar"] * {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .main * {
+            max-width: 100%;
         }
     </style>
     """,
