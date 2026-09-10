@@ -28,6 +28,59 @@ st.caption("Transfer SAP Code and/or Brand from Excel to PowerPoint with safe ma
 st.markdown(
     """
     <style>
+        /* ---------- UPLOAD LABEL HIGHLIGHTS ---------- */
+
+        .upload-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            line-height: 1.15;
+            padding: 0.38rem 0.55rem;
+            margin: 0.12rem 0 0.28rem 0;
+            border-radius: 6px;
+            border-left: 4px solid;
+            letter-spacing: 0.01em;
+        }
+
+        .excel-label {
+            background: rgba(46, 160, 67, 0.16);
+            border-left-color: #2ea043;
+        }
+
+        .ppt-label {
+            background: rgba(220, 70, 70, 0.16);
+            border-left-color: #dc4646;
+        }
+
+        [data-testid="stSidebar"] [data-testid="stFileUploader"] label {
+            font-size: 0 !important;
+            line-height: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* ---------- LARGER SECTION / ACTION TEXT ---------- */
+
+        [data-testid="stSidebar"] h2 {
+            font-size: 1.02rem !important;
+        }
+
+        [data-testid="stSidebar"] h3 {
+            font-size: 0.86rem !important;
+        }
+
+        [data-testid="stSidebar"] .stCaption {
+            font-size: 0.64rem !important;
+        }
+
+        [data-testid="stSidebar"] .stButton button {
+            font-size: 0.70rem !important;
+        }
+
+        [data-testid="stSidebar"] [data-baseweb="select"] * {
+            font-size: 0.69rem !important;
+        }
+
         /* =====================================================
            TIGHT PROFESSIONAL SIDEBAR
            Reduce unnecessary vertical gaps while keeping the
@@ -1098,11 +1151,15 @@ with st.sidebar:
 
     st.markdown("### 1. Upload Files")
 
+    st.markdown('<div class="upload-label excel-label">Upload Excel File</div>', unsafe_allow_html=True)
+
     excel_file = st.file_uploader(
         "Upload Excel File",
         type=["xlsx", "xls"],
         key="excel_upload"
     )
+
+    st.markdown('<div class="upload-label ppt-label">Upload PowerPoint Template</div>', unsafe_allow_html=True)
 
     ppt_file = st.file_uploader(
         "Upload PowerPoint Template",
