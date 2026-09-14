@@ -438,7 +438,22 @@ def names_similar(name1, name2, threshold=0.88):
 # =========================================================
 
 def clean_column_name(col):
-    return normalize_text(col)
+    """Normalize Excel headings so SAP/Brand are detected regardless of case or separators."""
+    if col is None:
+        return ""
+
+    try:
+        if pd.isna(col):
+            return ""
+    except Exception:
+        pass
+
+    # Case-insensitive and separator-insensitive matching.
+    # Examples: SAPCODE, SapCode, SAP Code, sap code, SAP-CODE, SAP_CODE -> SAPCODE
+    #           Brand, brand, BRAND -> BRAND
+    value = str(col).strip().upper()
+    value = re.sub(r"[^A-Z0-9]", "", value)
+    return value
 
 
 def detect_columns(df):
@@ -526,21 +541,27 @@ def detect_columns(df):
 
     def find_column(aliases, exclude=None):
         exclude = exclude or []
-        alias_norms = [clean_column_name(x) for x in aliases]
 
-        # Exact match first
+        # Normalize aliases exactly the same way as Excel headings.
+        alias_norms = {
+            clean_column_name(alias)
+            for alias in aliases
+            if clean_column_name(alias)
+        }
+
+        # 1. Exact normalized match
         for col, norm in normalized_columns.items():
             if col in exclude:
                 continue
             if norm in alias_norms:
                 return col
 
-        # Partial match second
+        # 2. Partial normalized match
         for col, norm in normalized_columns.items():
             if col in exclude:
                 continue
             for alias_norm in alias_norms:
-                if alias_norm and alias_norm in norm:
+                if alias_norm and (alias_norm in norm or norm in alias_norm):
                     return col
 
         return None
