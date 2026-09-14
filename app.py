@@ -457,7 +457,10 @@ def clean_column_name(col):
 
 
 def detect_columns(df):
-
+    """
+    Detect Excel columns using exact normalized heading matches.
+    Manual dropdown selections can override Name and Contact.
+    """
     columns = list(df.columns)
 
     normalized_columns = {
@@ -474,6 +477,7 @@ def detect_columns(df):
         "OUTLET",
         "DEALER",
         "CUSTOMER NAME",
+        "AWARDEE NAME",
         "NAME"
     ]
 
@@ -481,11 +485,13 @@ def detect_columns(df):
         "DEALER / CONTACT",
         "DEALER CONTACT",
         "CONTACT NO",
+        "CONTACT NO.",
         "CONTACT NUMBER",
         "CONTACT",
         "PHONE",
         "MOBILE",
-        "MOBILE NO"
+        "MOBILE NO",
+        "MOBILE NUMBER"
     ]
 
     sap_aliases = [
@@ -505,32 +511,12 @@ def detect_columns(df):
         "ADDRESS"
     ]
 
-    district_aliases = [
-        "DISTRICT NAME",
-        "DISTRICT"
-    ]
+    district_aliases = ["DISTRICT NAME", "DISTRICT"]
 
-    type_aliases = [
-        "TYPE",
-        "MEDIA TYPE",
-        "MEDIA"
-    ]
-
-    width_aliases = [
-        "W",
-        "WIDTH"
-    ]
-
-    height_aliases = [
-        "H",
-        "HEIGHT"
-    ]
-
-    size_aliases = [
-        "SIZE",
-        "DIMENSION",
-        "DIMENSIONS"
-    ]
+    type_aliases = ["TYPE", "MEDIA TYPE", "MEDIA"]
+    width_aliases = ["W", "WIDTH"]
+    height_aliases = ["H", "HEIGHT"]
+    size_aliases = ["SIZE", "DIMENSION", "DIMENSIONS"]
 
     brand_aliases = [
         "BRAND",
@@ -541,38 +527,28 @@ def detect_columns(df):
 
     def find_column(aliases, exclude=None):
         exclude = exclude or []
-
-        # Normalize aliases exactly the same way as Excel headings.
         alias_norms = {
             clean_column_name(alias)
             for alias in aliases
             if clean_column_name(alias)
         }
 
-        # 1. Exact normalized match
+        # Exact normalized match only.
+        # This prevents "Award Name" from being incorrectly selected
+        # merely because it contains the word "NAME".
         for col, norm in normalized_columns.items():
             if col in exclude:
                 continue
             if norm in alias_norms:
                 return col
 
-        # 2. Partial normalized match
-        for col, norm in normalized_columns.items():
-            if col in exclude:
-                continue
-            for alias_norm in alias_norms:
-                if alias_norm and (alias_norm in norm or norm in alias_norm):
-                    return col
-
         return None
 
     mapping["name"] = find_column(name_aliases)
-
     mapping["contact"] = find_column(
         contact_aliases,
         exclude=[mapping["name"]] if mapping["name"] else []
     )
-
     mapping["sap"] = find_column(sap_aliases)
     mapping["address"] = find_column(address_aliases)
     mapping["district"] = find_column(district_aliases)
@@ -581,7 +557,6 @@ def detect_columns(df):
     mapping["height"] = find_column(height_aliases)
     mapping["brand"] = find_column(brand_aliases)
 
-    # Give Width + Height priority for Size
     if mapping["width"] and mapping["height"]:
         mapping["size"] = None
     else:
@@ -638,11 +613,9 @@ def extract_shape_text(shape):
 
 
 def extract_ppt_fields(prs):
-
     slides_data = []
 
     for slide_number, slide in enumerate(prs.slides, start=1):
-
         data = {
             "slide": slide_number,
             "name": "",
@@ -658,26 +631,19 @@ def extract_ppt_fields(prs):
         }
 
         for shape_index, shape in enumerate(slide.shapes):
-
             text = extract_shape_text(shape)
-
             if not text:
                 continue
 
             for line in text.splitlines():
-
                 field, value = parse_label_line(line)
-
                 if field:
                     data[field] = value
 
             lower_text = text.lower()
-
-            if (
-                "outlet name" in lower_text
-                and "contact" in lower_text
-                and "district" in lower_text
-            ):
+            # The actual template information box contains Outlet Name
+            # and Contact No; District is not present in this template.
+            if "outlet name" in lower_text and "contact" in lower_text:
                 data["info_shape_index"] = shape_index
 
         slides_data.append(data)
@@ -717,75 +683,45 @@ def get_excel_size(row, mapping):
 # =========================================================
 
 def find_best_slide(excel_row, ppt_slides, mapping, used_slides):
-
     excel_name = excel_row.get(mapping.get("name"), "")
     excel_contact = excel_row.get(mapping.get("contact"), "")
     excel_size = get_excel_size(excel_row, mapping)
-
     excel_phones = normalize_phone(excel_contact)
 
     if not excel_name:
-        return None, "Excel dealer/outlet name is missing"
-
+        return None, "Excel name is missing"
     if not excel_phones:
         return None, "Excel contact number is missing or invalid"
 
     candidates = []
-
     for ppt in ppt_slides:
-
         slide_no = ppt["slide"]
-
-        # Each PowerPoint slide can be used only once
         if slide_no in used_slides:
             continue
-
         if not names_similar(excel_name, ppt.get("name", "")):
             continue
-
         ppt_phones = normalize_phone(ppt.get("contact", ""))
-
         if not ppt_phones:
             continue
-
-        contact_match = any(
-            phone in ppt_phones
-            for phone in excel_phones
-        )
-
-        if not contact_match:
-            continue
-
-        candidates.append(ppt)
+        if any(phone in ppt_phones for phone in excel_phones):
+            candidates.append(ppt)
 
     if not candidates:
         return None, "No Name + Contact match found"
 
-    # Unique Name + Contact match
-    if len(candidates) == 1:
-        return candidates[0], "Matched by Name + Contact"
+    if excel_size:
+        size_candidates = [
+            ppt for ppt in candidates
+            if sizes_equal(excel_size, ppt.get("size", ""))
+        ]
+        if size_candidates:
+            return size_candidates[0], (
+                "Matched by Name + Contact + Size"
+                if len(size_candidates) == 1
+                else "Matched by Name + Contact + Size (duplicate resolved by PPT order)"
+            )
 
-    # Duplicate Name + Contact requires Size verification
-    if not excel_size:
-        return None, "Multiple Name + Contact matches found; Size is required for verification"
-
-    size_candidates = []
-
-    for ppt in candidates:
-
-        if sizes_equal(
-            excel_size,
-            ppt.get("size", "")
-        ):
-            size_candidates.append(ppt)
-
-    if len(size_candidates) == 1:
-        return size_candidates[0], "Matched by Name + Contact + Size"
-
-    if len(size_candidates) > 1:
-        return None, "Multiple Name + Contact + Size matches found; transfer skipped"
-
-    return None, "Multiple Name + Contact matches found, but Size did not match"
+    return candidates[0], "Matched by Name + Contact"
 
 
 # =========================================================
@@ -824,64 +760,42 @@ def clear_and_add_bold_text(shape, lines, font_size=15):
 # =========================================================
 
 def add_sap_to_info_shape(shape, sap_code):
+    sap_code = "" if sap_code is None else str(sap_code).strip()
+    if not sap_code or sap_code.lower() == "nan":
+        return False
 
-    old_text = shape.text or ""
-    fields = []
-
-    for line in old_text.splitlines():
-
+    old_lines = [line.strip() for line in (shape.text or "").splitlines() if line.strip()]
+    kept_lines = []
+    for line in old_lines:
         field, value = parse_label_line(line)
+        if field == "sap":
+            continue
+        kept_lines.append(line)
 
-        if field in [
-            "name",
-            "address",
-            "contact",
-            "district"
-        ]:
-            fields.append((field, value))
+    kept_lines.append(f"Sapcode : {sap_code}")
 
-    final_lines = []
-    inserted = False
+    existing_size = 16
+    existing_font_name = None
+    try:
+        first_run = shape.text_frame.paragraphs[0].runs[0]
+        if first_run.font.size:
+            existing_size = first_run.font.size.pt
+        existing_font_name = first_run.font.name
+    except Exception:
+        pass
 
-    label_map = {
-        "name": "Outlet Name",
-        "address": "Address",
-        "contact": "Contact No",
-        "district": "District"
-    }
+    font_size = min(existing_size, 14 if len(kept_lines) >= 4 else existing_size)
+    clear_and_add_bold_text(shape, kept_lines, font_size)
 
-    for field, value in fields:
+    if existing_font_name:
+        try:
+            for paragraph in shape.text_frame.paragraphs:
+                for run in paragraph.runs:
+                    run.font.name = existing_font_name
+        except Exception:
+            pass
 
-        final_lines.append(
-            f"{label_map[field]} : {value}"
-        )
-
-        if field == "district":
-
-            final_lines.append(
-                f"Sapcode     : {sap_code}"
-            )
-
-            inserted = True
-
-    if not inserted:
-        final_lines.append(
-            f"Sapcode     : {sap_code}"
-        )
-
-    # Reduce font size when the information block contains many lines
-    if len(final_lines) >= 8:
-        font_size = 12
-    elif len(final_lines) >= 7:
-        font_size = 13
-    else:
-        font_size = 15
-
-    clear_and_add_bold_text(
-        shape,
-        final_lines,
-        font_size
-    )
+    return True
 
 
 # =========================================================
@@ -889,32 +803,20 @@ def add_sap_to_info_shape(shape, sap_code):
 # =========================================================
 
 def find_info_shape(slide, info_shape_index):
-
     if info_shape_index is not None:
-
         try:
             if info_shape_index < len(slide.shapes):
                 shape = slide.shapes[info_shape_index]
-
-                if (
-                    "outlet name" in extract_shape_text(shape).lower()
-                    and "contact" in extract_shape_text(shape).lower()
-                ):
+                text = extract_shape_text(shape).lower()
+                if "outlet name" in text and "contact" in text:
                     return shape
-        except:
+        except Exception:
             pass
 
     for shape in slide.shapes:
-
         text = extract_shape_text(shape).lower()
-
-        if (
-            "outlet name" in text
-            and "contact" in text
-            and "district" in text
-        ):
+        if "outlet name" in text and "contact" in text:
             return shape
-
     return None
 
 
