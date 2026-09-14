@@ -1221,6 +1221,69 @@ with st.sidebar:
         "Brand is placed in the designated brand area."
     )
 
+    # ---------------------------------------------------------
+    # MANUAL MATCH COLUMN SELECTION
+    # ---------------------------------------------------------
+    # Auto-detection remains the default, but the user can
+    # explicitly choose which Excel columns contain Name and
+    # Contact. This removes dependency on Excel heading names.
+    manual_name_col = None
+    manual_contact_col = None
+
+    if excel_file is not None:
+        try:
+            excel_preview = pd.read_excel(io.BytesIO(excel_file.getvalue()), nrows=0)
+            excel_columns = [str(col) for col in excel_preview.columns]
+
+            auto_mapping_preview = detect_columns(excel_preview)
+            auto_name = auto_mapping_preview.get("name")
+            auto_contact = auto_mapping_preview.get("contact")
+
+            st.markdown("### 3. Match Columns")
+            st.caption("Choose the Excel columns used to match each PPT record. Auto Detect is selected by default.")
+
+            name_options = ["Auto Detect"] + excel_columns
+            contact_options = ["Auto Detect"] + excel_columns
+
+            name_default = (
+                name_options.index(str(auto_name))
+                if auto_name is not None and str(auto_name) in name_options
+                else 0
+            )
+            contact_default = (
+                contact_options.index(str(auto_contact))
+                if auto_contact is not None and str(auto_contact) in contact_options
+                else 0
+            )
+
+            selected_name_col = st.selectbox(
+                "Match Name using Excel column",
+                name_options,
+                index=name_default,
+                key="match_name_column"
+            )
+
+            selected_contact_col = st.selectbox(
+                "Match Contact using Excel column",
+                contact_options,
+                index=contact_default,
+                key="match_contact_column"
+            )
+
+            if selected_name_col != "Auto Detect":
+                manual_name_col = selected_name_col
+
+            if selected_contact_col != "Auto Detect":
+                manual_contact_col = selected_contact_col
+
+            if auto_name or auto_contact:
+                st.caption(
+                    f"Auto detected → Name: {auto_name or 'Not found'} | "
+                    f"Contact: {auto_contact or 'Not found'}"
+                )
+        except Exception as column_error:
+            st.warning(f"Could not read Excel headings: {column_error}")
+
     st.markdown("---")
 
     ready = excel_file is not None and ppt_file is not None
@@ -1266,6 +1329,15 @@ if excel_file and ppt_file and process_button:
 
         df = pd.read_excel(excel_file)
         mapping = detect_columns(df)
+
+        # Manual Name/Contact selections override automatic detection.
+        # SAP Code, Brand and the remaining fields continue to use the
+        # existing automatic detection logic.
+        if manual_name_col and manual_name_col in df.columns:
+            mapping["name"] = manual_name_col
+
+        if manual_contact_col and manual_contact_col in df.columns:
+            mapping["contact"] = manual_contact_col
 
         missing = []
         if not mapping.get("name"):
